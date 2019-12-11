@@ -1,5 +1,6 @@
 package edu.diyan.reactor;
 
+import lombok.Value;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
@@ -19,6 +20,15 @@ public class FluxTest1 {
         return Flux.fromIterable(Arrays.asList("foo", "bar"));
     }
 
+    static Flux<User> u1u2Flux() {
+        return Flux.just(new User("u1"), new User("u2"));
+    }
+
+    static Flux<Integer> slowFlux(int numberOfElements, int durationInSec) {
+        return Flux.range(1, numberOfElements)
+                .delayElements(Duration.ofSeconds(durationInSec));
+    }
+
     static Flux<String> errorFlux() {
         return Flux.error(new IllegalStateException());
     }
@@ -28,4 +38,9 @@ public class FluxTest1 {
                 .take(10);
     }
 
+}
+
+@Value
+class User {
+    String username;
 }
