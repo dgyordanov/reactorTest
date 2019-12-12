@@ -1,12 +1,11 @@
 package edu.diyan.reactor;
 
-import lombok.Value;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 import java.util.Arrays;
 
-public class FluxTest1 {
+class FluxGenerator {
 
     static Flux<String> emptyFlux() {
         return Flux.empty();
@@ -40,7 +39,4 @@ public class FluxTest1 {
 
 }
 
-@Value
-class User {
-    String username;
-}
+
