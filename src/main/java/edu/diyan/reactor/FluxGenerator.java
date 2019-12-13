@@ -19,6 +19,11 @@ class FluxGenerator {
         return Flux.fromIterable(Arrays.asList("foo", "bar"));
     }
 
+    static Flux<String> fooBarFluxWithDelay(int seconds) {
+        return Flux.just("foo", "bar")
+                .delayElements(Duration.ofSeconds(seconds));
+    }
+
     static Flux<User> u1u2Flux() {
         return Flux.just(new User("u1"), new User("u2"));
     }

@@ -12,6 +12,7 @@ class TransformFlux {
         waitFor(11);
     }
 
+    // Execute slow operations parallel with flatMap
     static Flux<User> capitalizeUsernamesSlow() {
         return FluxGenerator.u1u2Flux()
                 .flatMap(TransformFlux::asyncCapitalizeUser);
