@@ -4,6 +4,7 @@ import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Random;
 
 class FluxGenerator {
 
@@ -31,6 +32,12 @@ class FluxGenerator {
     static Flux<Integer> slowFlux(int numberOfElements, int durationInSec) {
         return Flux.range(1, numberOfElements)
                 .delayElements(Duration.ofSeconds(durationInSec));
+    }
+
+    static Flux<Integer> interval10RandomInt(Duration interval) {
+        return Flux.interval(interval)
+                .map(val -> new Random().nextInt(100))
+                .take(10);
     }
 
     static Flux<String> errorFlux() {
