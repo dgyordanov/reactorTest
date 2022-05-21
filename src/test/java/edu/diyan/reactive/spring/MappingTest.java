@@ -3,6 +3,7 @@ package edu.diyan.reactive.spring;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.Duration;
@@ -51,8 +52,23 @@ public class MappingTest {
                 .verifyComplete();
     }
 
-    private Flux<String> delayElement(String element, int delay) {
-        return Flux.just(element).delayElements(Duration.ofMillis(delay));
+    /**
+     * switchMap cancels the processing of previous flux once a new one comes in.
+     * Switching from previous flux to the next one
+     * Useful for situation like autocomplete.
+     */
+    @Test
+    public void switchMapTest() {
+        var autocompleteFlux = Flux.just("re", "rea", "reac", "react")
+                .switchMap(e -> delayElement(e, 500));
+
+        StepVerifier.create(autocompleteFlux)
+                .expectNext("react")
+                .verifyComplete();
+    }
+
+    private Mono<String> delayElement(String element, int delay) {
+        return Mono.just(element).delayElement(Duration.ofMillis(delay));
     }
 
 }
