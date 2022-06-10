@@ -27,11 +27,12 @@ import static org.junit.Assert.assertEquals;
 public class CustomSchedulersTest {
 
     private static final String DECORATOR_KEY = "custom-decorator";
-    private final AtomicInteger invokationCounter = new AtomicInteger();
+    private AtomicInteger invokationCounter = new AtomicInteger();
 
     @Before
     public void setUp() {
         Schedulers.resetFactory();
+        invokationCounter = new AtomicInteger();
     }
 
     @After
@@ -106,7 +107,7 @@ public class CustomSchedulersTest {
     }
 
     @Test
-    public void testSubscribeOn() {
+    public void testSubscribeOn() throws InterruptedException {
         var threadName = CustomSchedulersTest.class.getName();
         var map = new ConcurrentHashMap<String, AtomicInteger>();
 
