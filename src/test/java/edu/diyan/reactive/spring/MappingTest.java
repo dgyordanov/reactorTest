@@ -67,6 +67,44 @@ public class MappingTest {
                 .verifyComplete();
     }
 
+
+    @Test
+    public void flatMapSlowTest() {
+        var flux = Flux.range(1, 10)
+                .flatMap(this::delayIt)
+                .doOnNext(System.out::println);
+
+        StepVerifier.create(flux)
+                .expectNextCount(10)
+                .verifyComplete();
+    }
+
+    @Test
+    public void concatMapSlowTest() {
+        var flux = Flux.range(1, 10)
+                .concatMap(this::delayIt)
+                .doOnNext(System.out::println);
+
+        StepVerifier.create(flux)
+                .expectNextCount(10)
+                .verifyComplete();
+    }
+
+    @Test
+    public void flatMapSequentialSlowTest() {
+        var flux = Flux.range(1, 10)
+                .flatMapSequential(this::delayIt)
+                .doOnNext(System.out::println);
+
+        StepVerifier.create(flux)
+                .expectNextCount(10)
+                .verifyComplete();
+    }
+
+    private Mono<Integer> delayIt(int element) {
+        return Mono.just(element).delayElement(Duration.ofMillis((long) (1000L * Math.random())));
+    }
+
     private Mono<String> delayElement(String element, int delay) {
         return Mono.just(element).delayElement(Duration.ofMillis(delay));
     }
