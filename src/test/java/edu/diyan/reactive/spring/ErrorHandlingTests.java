@@ -31,14 +31,16 @@ public class ErrorHandlingTests {
     public void testPropagateError() {
         var flux = Flux.just("A", "B", "C", "D")
                 .concatMap(e -> {
-                    try {
+//                    try {
                         return this.customMap(e)
                                 .onErrorResume(error -> Mono.just("F"));
-                    } catch (Exception ex) {
-                        return Mono.just("G");
-                    }
+//                    } catch (Exception ex) {
+//                        return Mono.just("G");
+//                    }
                 })
                 .onErrorResume(e -> Mono.just("E"))
+                // To resubscribe on completion
+                //.repeat()
                 // just to see what is being emitted
                 .doOnNext(System.out::println);
 
