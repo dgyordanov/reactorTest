@@ -5,6 +5,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class ErrorHandlingTests {
 
     @Test
@@ -16,14 +19,14 @@ public class ErrorHandlingTests {
                     }
                     return a;
                 })
-                .onErrorResume(e -> Mono.just("E"))
+                .onErrorResume(e -> Flux.just("E", "F"))
                 // just to see what is being emitted
                 .log();
 
         StepVerifier.create(flux)
                 .expectSubscription()
                 // expect the fallback value
-                .expectNext("A", "E")
+                .expectNext("A", "E", "F")
                 .verifyComplete();
     }
 
@@ -32,22 +35,22 @@ public class ErrorHandlingTests {
         var flux = Flux.just("A", "B", "C", "D")
                 .concatMap(e -> {
 //                    try {
-                        return this.customMap(e)
-                                .onErrorResume(error -> Mono.just("F"));
+                    return this.customMap(e)
+                            .onErrorResume(error -> Mono.just("F"));
 //                    } catch (Exception ex) {
 //                        return Mono.just("G");
 //                    }
                 })
                 .onErrorResume(e -> Mono.just("E"))
                 // To resubscribe on completion
-                //.repeat()
+                .repeat(2)
                 // just to see what is being emitted
                 .doOnNext(System.out::println);
 
         StepVerifier.create(flux)
                 .expectSubscription()
                 // expect the fallback value
-                .expectNext("A", "G", "C", "D")
+                .expectNext("A", "E", "A", "E", "A", "E")
                 .verifyComplete();
     }
 
@@ -57,4 +60,33 @@ public class ErrorHandlingTests {
         }
         return Mono.just(a);
     }
+
+    @Test
+    public void testRetry() {
+        AtomicBoolean errored = new AtomicBoolean(false);
+
+        var erroredFlux = Flux.create(sink -> {
+            if (!errored.get()) {
+                errored.set(true);
+                sink.error(new RuntimeException("test retry"));
+                System.out.println("Error....");
+            } else {
+                System.out.println("Emit element");
+                sink.next(1);
+            }
+            sink.complete();
+        });
+
+        // retry() - resubscribe only on error
+        // repeat() - resubscribe on any completion
+        // retryBackoff() - retry after duration
+        var erroredRetryFlux = erroredFlux
+                .retry();
+                //.retryBackoff(3, Duration.ofSeconds(3));
+
+        StepVerifier.create(erroredRetryFlux)
+                .expectNext(1)
+                .expectComplete();
+    }
+
 }
